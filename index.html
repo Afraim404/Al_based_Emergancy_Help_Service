@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafetyPal - Emergency Response App</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .mobile-container {
+            max-width: 375px;
+            min-height: 667px;
+            margin: 20px auto;
+            border: 10px solid #222;
+            border-radius: 30px;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notch {
+            width: 150px;
+            height: 25px;
+            background-color: #222;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        
+        .app-container {
+            height: 100%;
+            padding: 30px 15px 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            color: #e63946;
+        }
+        
+        .profile {
+            width: 30px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        .emergency-button {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .emergency-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(230, 57, 70, 0.4);
+        }
+        
+        .emergency-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
+        }
+        
+        .feature-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #1d3557;
+        }
+        
+        .feature-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f1faee;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #457b9d;
+            font-size: 18px;
+        }
+        
+        .back-btn {
+            padding: 8px 15px;
+            background-color: #f1f1f1;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            width: fit-content;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #457b9d;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #a8dadc;
+            color: #1d3557;
+        }
+        
+        .chatbot-container {
+            background-color: #f1faee;
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background-color: #e9ecef;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background-color: #457b9d;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+        }
+        
+        .chat-input button {
+            background-color: #457b9d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .emergency-contacts {
+            margin-bottom: 20px;
+        }
+        
+        .contact-card {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+        }
+        
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #a8dadc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            color: #1d3557;
+            font-weight: bold;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .contact-phone {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .emergency-active {
+            background-color: #fee2e2;
+            color: #ef4444;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .emergency-active h2 {
+            color: #dc2626;
+            margin-bottom: 10px;
+        }
+        
+        .location-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .location-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .map-placeholder {
+            height: 150px;
+            background-color: #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .response-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            margin-top: auto;
+        }
+        
+        .nav-tab {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .nav-tab.active {
+            background-color: #a8dadc;
+            color: #1d3557;
+        }
+        
+        .nav-tab i {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .star {
+            color: #ccc;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .star.active {
+            color: #ffc107;
+        }
+        
+        /* Animation for emergency button */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="notch"></div>
+        <div class="app-container">
+            <div class="header">
+                <h1>SafetyPal</h1>
+                <div class="profile">U</div>
+            </div>
+            
+            <!-- Home Screen -->
+            <div class="screen active" id="home-screen">
+                <button class="emergency-button" onclick="activateEmergency()">EMERGENCY SOS</button>
+                
+                <div class="feature-card" onclick="showScreen('contacts-screen')">
+                    <div class="feature-icon">👥</div>
+                    <h2>Emergency Contacts</h2>
+                    <p>Manage your trusted contacts who will be alerted in case of emergency</p>
+                </div>
+                
+                <div class="feature-card" onclick="showScreen('chatbot-screen')">
+                    <div class="feature-icon">🤖</div>
+                    <h2>First Aid AI Assistant</h2>
+                    <p>Get immediate first aid guidance from our AI chatbot</p>
+                </div>
+                
+                <div class="feature-card" onclick="showScreen('reports-screen')">
+                    <div class="feature-icon">📋</div>
+                    <h2>Incident Reports</h2>
+                    <p>View your past reports and their status</p>
+                </div>
+                
+                <div class="feature-card" onclick="showScreen('rating-screen')">
+                    <div class="feature-icon">⭐</div>
+                    <h2>Rate Services</h2>
+                    <p>Rate the emergency services that helped you</p>
+                </div>
+                
+                <div class="nav-tabs">
+                    <div class="nav-tab active">
+                        <i>🏠</i>
+                        Home
+                    </div>
+                    <div class="nav-tab" onclick="showScreen('chatbot-screen')">
+                        <i>🤖</i>
+                        Help
+                    </div>
+                    <div class="nav-tab" onclick="showScreen('profile-screen')">
+                        <i>👤</i>
+                        Profile
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emergency Active Screen -->
+            <div class="screen" id="emergency-active-screen">
+                <div class="emergency-active">
+                    <h2>Emergency Active</h2>
+                    <p>Help is on the way. Stay calm.</p>
+                </div>
+                
+                <div class="location-card">
+                    <h3>Your Current Location</h3>
+                    <div class="map-placeholder">Map View</div>
+                    <p>123 Main Street, City, State</p>
+                    <p>Coordinates: 37.7749° N, 122.4194° W</p>
+                </div>
+                
+                <div class="emergency-contacts">
+                    <h3>Contacts Notified:</h3>
+                    <div class="contact-card">
+                        <div class="contact-avatar">J</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Jane Smith</div>
+                            <div class="contact-phone">Message sent ✓</div>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-avatar">E</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Emergency Services</div>
+                            <div class="contact-phone">Alert sent ✓</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="cancelEmergency()">Cancel Emergency</button>
+            </div>
+            
+            <!-- Contacts Screen -->
+            <div class="screen" id="contacts-screen">
+                <button class="back-btn" onclick="showScreen('home-screen')">← Back</button>
+                <h2>Emergency Contacts</h2>
+                <p>These contacts will receive your location and alert when you activate emergency mode</p>
+                
+                <div class="emergency-contacts">
+                    <div class="contact-card">
+                        <div class="contact-avatar">J</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Jane Smith</div>
+                            <div class="contact-phone">+1 (555) 123-4567</div>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-avatar">M</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Michael Johnson</div>
+                            <div class="contact-phone">+1 (555) 987-6543</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="showAddContactForm()">Add New Contact</button>
+                
+                <div id="add-contact-form" style="display: none; margin-top: 20px;">
+                    <h3>Add New Contact</h3>
+                    <div class="form-group">
+                        <label for="contact-name">Name</label>
+                        <input type="text" id="contact-name" placeholder="Contact Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-phone">Phone Number</label>
+                        <input type="tel" id="contact-phone" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-relation">Relationship</label>
+                        <select id="contact-relation">
+                            <option value="family">Family</option>
+                            <option value="friend">Friend</option>
+                            <option value="colleague">Colleague</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addContact()">Save Contact</button>
+                </div>
+            </div>
+            
+            <!-- Chatbot Screen -->
+            <div class="screen" id="chatbot-screen">
+                <button class="back-btn" onclick="showScreen('home-screen')">← Back</button>
+                <h2>First Aid AI Assistant</h2>
+                
+                <div class="chatbot-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            Hello! I'm your First Aid AI Assistant. How can I help you today?
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" id="user-message" placeholder="Type your message...">
+                        <button onclick="sendMessage()">↑</button>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <h2>Common First Aid Topics</h2>
+                    <p>Tap to get instant help:</p>
+                    <div class="response-buttons">
+                        <button class="btn btn-secondary" onclick="askAbout('CPR')">CPR</button>
+                        <button class="btn btn-secondary" onclick="askAbout('Burn')">Burns</button>
+                        <button class="btn btn-secondary" onclick="askAbout('Bleeding')">Bleeding</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports Screen -->
+            <div class="screen" id="reports-screen">
+                <button class="back-btn" onclick="showScreen('home-screen')">← Back</button>
+                <h2>Incident Reports</h2>
+                <p>Past emergency events and their status</p>
+                
+                <div class="feature-card">
+                    <h2>April 28, 2025 - 2:35 PM</h2>
+                    <p>Type: Medical Emergency</p>
+                    <p>Status: Resolved</p>
+                    <p>Location: Downtown Area</p>
+                    <button class="btn btn-secondary" onclick="showReportDetails()">View Details</button>
+                </div>
+                
+                <div class="feature-card">
+                    <h2>March 15, 2025 - 8:12 AM</h2>
+                    <p>Type: Safety Concern</p>
+                    <p>Status: Completed</p>
+                    <p>Location: Home</p>
+                    <button class="btn btn-secondary" onclick="showReportDetails()">View Details</button>
+                </div>
+            </div>
+            
+            <!-- Rating Screen -->
+            <div class="screen" id="rating-screen">
+                <button class="back-btn" onclick="showScreen('home-screen')">← Back</button>
+                <h2>Rate Emergency Services</h2>
+                
+                <div class="feature-card">
+                    <h2>April 28, 2025 Response</h2>
+                    <p>Emergency Medical Team</p>
+                    
+                    <div class="star-rating" id="rating">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rating-comments">Comments (Optional)</label>
+                        <textarea id="rating-comments" rows="3" placeholder="Share your feedback..."></textarea>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="submitRating()">Submit Rating</button>
+                </div>
+            </div>
+            
+            <!-- Profile Screen -->
+            <div class="screen" id="profile-screen">
+                <button class="back-btn" onclick="showScreen('home-screen')">← Back</button>
+                <h2>Your Profile</h2>
+                
+                <div class="form-group">
+                    <label for="user-name">Name</label>
+                    <input type="text" id="user-name" value="Alex Johnson" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-phone">Phone</label>
+                    <input type="tel" id="user-phone" value="+1 (555) 234-5678" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="medical-info">Medical Information</label>
+                    <textarea id="medical-info" rows="3" placeholder="Add important medical information..." disabled>Allergic to penicillin. Blood type: O+</textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="editProfile()">Edit Profile</button>
+                
+                <div class="feature-card" style="margin-top: 20px;">
+                    <h2>Security Settings</h2>
+                    <p>Configure your security preferences</p>
+                    <button class="btn btn-secondary">Change Password</button>
+                </div>
+                
+                <button class="btn btn-secondary" style="margin-top: 20px; background-color: #f8d7da; color: #721c24;">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Show a specific screen
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show the selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update active tab if applicable
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (screenId === 'home-screen') {
+                document.querySelector('.nav-tab:nth-child(1)').classList.add('active');
+            } else if (screenId === 'chatbot-screen') {
+                document.querySelector('.nav-tab:nth-child(2)').classList.add('active');
+            } else if (screenId === 'profile-screen') {
+                document.querySelector('.nav-tab:nth-child(3)').classList.add('active');
+            }
+        }
+        
+        // Activate emergency mode
+        function activateEmergency() {
+            // Flash animation on button
+            document.querySelector('.emergency-button').classList.add('pulse');
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                showScreen('emergency-active-screen');
+                
+                // Show alert
+                alert('Emergency activated! SMS alerts sent to your emergency contacts with your current location.');
+            }, 1000);
+        }
+        
+        // Cancel emergency
+        function cancelEmergency() {
+            document.querySelector('.emergency-button').classList.remove('pulse');
+            showScreen('home-screen');
+            alert('Emergency canceled. Your contacts have been notified that you are safe.');
+        }
+        
+        // Show add contact form
+        function showAddContactForm() {
+            document.getElementById('add-contact-form').style.display = 'block';
+        }
+        
+        // Add a new contact
+        function addContact() {
+            const name = document.getElementById('contact-name').value;
+            const phone = document.getElementById('contact-phone').value;
+            
+            if (name && phone) {
+                alert(`Contact ${name} added successfully!`);
+                document.getElementById('add-contact-form').style.display = 'none';
+                
+                // Reset form
+                document.getElementById('contact-name').value = '';
+                document.getElementById('contact-phone').value = '';
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+        
+        // Send chat message
+        function sendMessage() {
+            const userInput = document.getElementById('user-message');
+            const messageText = userInput.value.trim();
+            
+            if (messageText) {
+                // Add user message
+                const chatMessages = document.getElementById('chat-messages');
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('message', 'user-message');
+                userMessage.textContent = messageText;
+                chatMessages.appendChild(userMessage);
+                
+                // Clear input
+                userInput.value = '';
+                
+                // Simulate bot thinking
+                setTimeout(() => {
+                    respondToMessage(messageText);
+                }, 1000);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+        
+        // Bot response
+        function respondToMessage(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('message', 'bot-message');
+            
+            // Simple responses based on keywords
+            message = message.toLowerCase();
+            
+            if (message.includes('hello') || message.includes('hi')) {
+                botMessage.textContent = 'Hello! How can I help you with first aid today?';
+            } else if (message.includes('cpr')) {
+                botMessage.textContent = 'For CPR: 1. Check if the person is responsive. 2. Call emergency services. 3. Place hands on center of chest. 4. Perform 30 compressions followed by 2 rescue breaths. 5. Continue until help arrives.';
+            } else if (message.includes('burn')) {
+                botMessage.textContent = 'For burns: 1. Cool the burn with cool (not cold) running water for 10-15 minutes. 2. Remove jewelry and clothing from the area unless stuck to the burn. 3. Cover with a sterile, non-fluffy bandage. 4. For severe burns, seek medical attention immediately.';
+            } else if (message.includes('bleeding')) {
+                botMessage.textContent = 'To stop bleeding: 1. Apply direct pressure to the wound with a clean cloth or bandage. 2. If possible, elevate the injured area above the heart. 3. Apply pressure until bleeding stops. 4. For severe bleeding, apply a tourniquet if trained and call emergency services immediately.';
+            } else {
+                botMessage.textContent = 'I understand you need help with "' + message + '". Could you provide more details about the situation so I can give you specific first aid instructions?';
+            }
+            
+            chatMessages.appendChild(botMessage);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Ask about specific first aid topic
+        function askAbout(topic) {
+            document.getElementById('user-message').value = `How do I perform ${topic} first aid?`;
+            sendMessage();
+        }
+        
+        // Show report details
+        function showReportDetails() {
+            alert('Report details would be displayed here, including tracking link history, responder communications, cloud backup status, and response timeline.');
+        }
+        
+        // Submit rating
+        function submitRating() {
+            alert('Thank you for your feedback! Your rating has been submitted.');
+            showScreen('home-screen');
+        }
+        
+        // Edit profile
+        function editProfile() {
+            const inputs = document.querySelectorAll('#profile-screen input, #profile-screen textarea');
+            inputs.forEach(input => {
+                input.disabled = !input.disabled;
+            });
+            
+            const button = document.querySelector('#profile-screen .btn-primary');
+            if (button.textContent === 'Edit Profile') {
+                button.textContent = 'Save Profile';
+            } else {
+                button.textContent = 'Edit Profile';
+                alert('Profile updated successfully!');
+            }
+        }
+        
+        // Star rating functionality
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const stars = document.querySelectorAll('.star');
+                
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // Handle user message input with Enter key
+        document.getElementById('user-message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
